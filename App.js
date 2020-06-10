@@ -8,11 +8,15 @@
 
 import React from 'react';
 import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
   SafeAreaView,
   StyleSheet,
   ScrollView,
   View,
   Text,
+  TextInput,
   StatusBar,
 } from 'react-native';
 
@@ -24,91 +28,114 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
+export default class App extends React.Component{
+
+/* create constructor and declare states in this */
+    constructor(props){
+        super(props);
+        this.state = {
+            isLoading : true,
+            text : '',
+            data : []
+        }
+        this.arrayholder = [];
+    }
+
+    /* call function componentDidMount to get data from web url and parse json data */
+
+    componentDidMount(){
+
+        /* call api with fetch method */
+
+        return fetch('https://jsonplaceholder.typicode.com/users')
+        .then((response)=> response.json())
+        .then((responseJson)=> {
+            console.log(responseJson);
+            this.setState(
+            {
+                isLoading: false,
+                data:responseJson,
+            }, () =>{
+              this.arrayholder = responseJson;
+            }
+            );
+        } ).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    GetFlatListItem(name){
+        Alert.alert('Clicked on '+name);
+    }
+
+      itemSeparator = () => {
+
+            return(
+            <View
+            style = {{
+            width : "100%",
+            height: .5,
+            backgroundColor : "#000",
+            }}
+
+            />
+
+            );
+      }
+
+    render()
+    {
+        /* show loader till api has called, when we get data show flat list with data fetched from response */
+        console.log(this.state.isLoading);
+        if(this.state.isLoading){
+            return(
+            <View style = {{ flex : 1 , paddingTop: 50 }}>
+            <ActivityIndicator/>
             </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
+            );
+        }
+        return (
+            <View style = { { width:"100%"}}>
+                <Text style = {{textAlign : 'center' , margin: 20}}> Data loaded from web api  </Text>
+
+                <FlatList
+                data= {this.state.data}
+                keyExtractor={(item,index) => index.toString()}
+                ItemSeparatorComponent = {this.itemSeparator}
+               renderItem={({ item }) => <Text style={styles.row}
+                         onPress={this.GetFlatListItem.bind(this, item.name)}>{item.name}</Text>}
+                         style={{ marginTop: 10 }} />
+
             </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
-};
+        );
+
+    }
+
+}
+
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
 
-export default App;
+  MainContainer: {
+    justifyContent: 'center',
+    flex: 1,
+    margin: 5,
+
+  },
+
+  row: {
+    fontSize: 18,
+    padding: 12
+  },
+
+  textInput: {
+
+    textAlign: 'center',
+    height: 42,
+    borderWidth: 1,
+    borderColor: '#009688',
+    borderRadius: 8,
+    backgroundColor: "#FFFF"
+
+  }
+});
