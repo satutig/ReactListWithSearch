@@ -68,6 +68,20 @@ export default class App extends React.Component{
         Alert.alert('Clicked on '+name);
     }
 
+        searchData(text) {
+            const newData = this.arrayholder.filter(item => {
+              const itemData = item.name.toUpperCase();
+              const textData = text.toUpperCase();
+              return itemData.indexOf(textData) > -1
+            });
+
+            this.setState({
+              data: newData,
+              text: text
+              })
+            }
+
+
       itemSeparator = () => {
 
             return(
@@ -95,14 +109,21 @@ export default class App extends React.Component{
             );
         }
         return (
-            <View style = { { width:"100%"}}>
+            <View>
                 <Text style = {{textAlign : 'center' , margin: 20}}> Data loaded from web api  </Text>
 
+                <TextInput style = {styles.textInput}
+                    value = {this.state.text}
+                    onChangeText={ (text)  => this.searchData(text) }
+                     underlineColorAndroid='transparent'
+                     placeholder="Search data from list"
+                 />
+
                 <FlatList
-                data= {this.state.data}
-                keyExtractor={(item,index) => index.toString()}
-                ItemSeparatorComponent = {this.itemSeparator}
-               renderItem={({ item }) => <Text style={styles.row}
+                    data= {this.state.data}
+                    keyExtractor={(item,index) => index.toString()}
+                    ItemSeparatorComponent = {this.itemSeparator}
+                    renderItem={({ item }) => <Text style={styles.row}
                          onPress={this.GetFlatListItem.bind(this, item.name)}>{item.name}</Text>}
                          style={{ marginTop: 10 }} />
 
@@ -132,6 +153,7 @@ const styles = StyleSheet.create({
 
     textAlign: 'center',
     height: 42,
+    margin: 20,
     borderWidth: 1,
     borderColor: '#009688',
     borderRadius: 8,
